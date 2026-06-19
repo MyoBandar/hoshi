@@ -1,0 +1,228 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "415fca80fef5bd1469003f9ad2b2db08",
+    "entities": [
+      {
+        "tableName": "kanji",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`character` TEXT NOT NULL, `meanings` TEXT NOT NULL, `onyomi` TEXT NOT NULL, `kunyomi` TEXT NOT NULL, `stroke_count` INTEGER, `jlpt_level` INTEGER, PRIMARY KEY(`character`))",
+        "fields": [
+          {
+            "fieldPath": "character",
+            "columnName": "character",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "meanings",
+            "columnName": "meanings",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "onyomi",
+            "columnName": "onyomi",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kunyomi",
+            "columnName": "kunyomi",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "strokeCount",
+            "columnName": "stroke_count",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "jlptLevel",
+            "columnName": "jlpt_level",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "character"
+          ]
+        }
+      },
+      {
+        "tableName": "radicals",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`character` TEXT NOT NULL, `meaning` TEXT, `stroke_count` INTEGER, PRIMARY KEY(`character`))",
+        "fields": [
+          {
+            "fieldPath": "character",
+            "columnName": "character",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "meaning",
+            "columnName": "meaning",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "strokeCount",
+            "columnName": "stroke_count",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "character"
+          ]
+        }
+      },
+      {
+        "tableName": "kanji_radicals",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`kanji` TEXT NOT NULL, `radical` TEXT NOT NULL, `relation_type` TEXT NOT NULL, PRIMARY KEY(`kanji`, `radical`), FOREIGN KEY(`kanji`) REFERENCES `kanji`(`character`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`radical`) REFERENCES `radicals`(`character`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "kanji",
+            "columnName": "kanji",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radical",
+            "columnName": "radical",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "relationType",
+            "columnName": "relation_type",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "kanji",
+            "radical"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_kanji_radicals_kanji",
+            "unique": false,
+            "columnNames": [
+              "kanji"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_kanji_radicals_kanji` ON `${TABLE_NAME}` (`kanji`)"
+          },
+          {
+            "name": "index_kanji_radicals_radical",
+            "unique": false,
+            "columnNames": [
+              "radical"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_kanji_radicals_radical` ON `${TABLE_NAME}` (`radical`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "kanji",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "kanji"
+            ],
+            "referencedColumns": [
+              "character"
+            ]
+          },
+          {
+            "table": "radicals",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "radical"
+            ],
+            "referencedColumns": [
+              "character"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "user_kanji",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`kanji` TEXT NOT NULL, `discovered_at` INTEGER NOT NULL, `last_seen_at` INTEGER NOT NULL, `discovery_count` INTEGER NOT NULL, `mastery_level` INTEGER NOT NULL, PRIMARY KEY(`kanji`), FOREIGN KEY(`kanji`) REFERENCES `kanji`(`character`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "kanji",
+            "columnName": "kanji",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discoveredAt",
+            "columnName": "discovered_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSeenAt",
+            "columnName": "last_seen_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "discoveryCount",
+            "columnName": "discovery_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "masteryLevel",
+            "columnName": "mastery_level",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "kanji"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_user_kanji_kanji",
+            "unique": false,
+            "columnNames": [
+              "kanji"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_user_kanji_kanji` ON `${TABLE_NAME}` (`kanji`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "kanji",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "kanji"
+            ],
+            "referencedColumns": [
+              "character"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '415fca80fef5bd1469003f9ad2b2db08')"
+    ]
+  }
+}

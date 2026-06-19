@@ -1,4 +1,4 @@
-package com.myobandar.hoshi.ui.theme
+package com.myobandar.hoshi.core.designsystem.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

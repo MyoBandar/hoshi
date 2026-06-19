@@ -24,4 +24,11 @@ dependencyResolutionManagement {
 
 rootProject.name = "Hoshi"
 include(":app")
- 
+include(":core:model")
+include(":core:designsystem")
+include(":core:database")
+include(":feature:graph")
+include(":feature:scanner")
+include(":feature:review")
+include(":feature:collection")
+include(":feature:settings")

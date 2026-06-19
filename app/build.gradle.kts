@@ -40,6 +40,12 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:designsystem"))
+    implementation(project(":feature:collection"))
+    implementation(project(":feature:graph"))
+    implementation(project(":feature:review"))
+    implementation(project(":feature:scanner"))
+    implementation(project(":feature:settings"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
