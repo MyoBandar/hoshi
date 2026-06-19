@@ -15,5 +15,5 @@ object HoshiDatabaseFactory {
             context.applicationContext,
             HoshiDatabase::class.java,
             DatabaseName
-        )
+        ).createFromAsset(DatabaseName)
 }
