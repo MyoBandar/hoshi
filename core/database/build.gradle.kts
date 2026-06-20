@@ -24,7 +24,7 @@ android {
 
     sourceSets {
         getByName("androidTest") {
-            assets.setSrcDirs(listOf(project(":app").projectDir.resolve("src/main/assets")))
+            assets.directories.add(project(":app").projectDir.resolve("src/main/assets").path)
         }
     }
 }
