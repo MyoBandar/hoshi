@@ -42,7 +42,7 @@ android {
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":feature:collection"))
-    implementation(project(":feature:graph"))
+    implementation(project(":feature:constellation"))
     implementation(project(":feature:review"))
     implementation(project(":feature:scanner"))
     implementation(project(":feature:settings"))

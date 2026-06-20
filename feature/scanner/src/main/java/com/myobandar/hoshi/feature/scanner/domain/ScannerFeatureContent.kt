@@ -20,5 +20,5 @@ val ScannerPlaceholderContent = ScannerFeatureContent(
     sampleKanji = listOf("非", "常", "口"),
     metrics = listOf(ScannerMetric("3", "found"), ScannerMetric("1", "saved")),
     cardTitle = "Discovery placeholder",
-    bullets = listOf("Camera extraction entry point", "Detected kanji queue", "Save-to-graph action")
+    bullets = listOf("Camera extraction entry point", "Detected kanji queue", "Save-to-constellation action")
 )

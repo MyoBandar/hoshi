@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.myobandar.hoshi.feature.graph"
+    namespace = "com.myobandar.hoshi.feature.constellation"
     compileSdk {
         version = release(37) {
             minorApiLevel = 0

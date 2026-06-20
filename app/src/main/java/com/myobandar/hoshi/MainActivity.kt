@@ -37,7 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.myobandar.hoshi.core.designsystem.theme.HoshiTheme
 import com.myobandar.hoshi.feature.collection.presentation.CollectionScreen
-import com.myobandar.hoshi.feature.graph.presentation.GraphScreen
+import com.myobandar.hoshi.feature.constellation.presentation.ConstellationScreen
 import com.myobandar.hoshi.feature.review.presentation.ReviewScreen
 import com.myobandar.hoshi.feature.scanner.presentation.ScannerScreen
 import com.myobandar.hoshi.feature.settings.domain.ThemePreference
@@ -75,7 +75,7 @@ fun HoshiApp(
     onThemePreferenceChange: (ThemePreference) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var selectedDestination by rememberSaveable { mutableStateOf(HoshiDestination.Graph) }
+    var selectedDestination by rememberSaveable { mutableStateOf(HoshiDestination.Constellation) }
     var settingsOpen by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -181,7 +181,7 @@ private fun HoshiDestinationContent(
     modifier: Modifier = Modifier
 ) {
     when (destination) {
-        HoshiDestination.Graph -> GraphScreen(
+        HoshiDestination.Constellation -> ConstellationScreen(
             icon = destination.icon,
             modifier = modifier
         )
@@ -204,8 +204,8 @@ private enum class HoshiDestination(
     val title: String,
     val icon: ImageVector
 ) {
-    Graph(
-        title = "Graph",
+    Constellation(
+        title = "Constellation",
         icon = Icons.Rounded.AccountTree
     ),
     Discover(

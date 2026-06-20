@@ -1,4 +1,4 @@
-package com.myobandar.hoshi.feature.graph.presentation
+package com.myobandar.hoshi.feature.constellation.presentation
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateOffsetAsState
@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -53,15 +54,15 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 
 @Composable
-fun GraphScreen(
+fun ConstellationScreen(
     icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
-    KanjiGraphCanvas(modifier = modifier)
+    KanjiConstellationCanvas(modifier = modifier)
 }
 
 @Composable
-private fun KanjiGraphCanvas(
+private fun KanjiConstellationCanvas(
     modifier: Modifier = Modifier
 ) {
     val graph = rememberKanjiRadicalGraph()
@@ -79,12 +80,12 @@ private fun KanjiGraphCanvas(
             canvasSize = canvasSize
         ),
         animationSpec = tween(durationMillis = 320),
-        label = "graphFocusScale"
+        label = "constellationFocusScale"
     )
     val focusedPan by animateOffsetAsState(
         targetValue = pan,
         animationSpec = tween(durationMillis = 320),
-        label = "graphPan"
+        label = "constellationPan"
     )
     val renderedScale = scale * focusScale
 
@@ -150,6 +151,25 @@ private fun KanjiGraphCanvas(
                 )
             }
 
+            if (selectedRadicalId == null) {
+                graph.radicalCategorySystems().forEach { categorySystem ->
+                    val systemCenter = categorySystem.center.toScreen(center, focusedPan, renderedScale)
+                    categorySystem.radii.forEach { radius ->
+                        drawCircle(
+                            color = HoshiCyan.copy(alpha = 0.18f),
+                            radius = radius * renderedScale,
+                            center = systemCenter,
+                            style = Stroke(width = 1.25f)
+                        )
+                    }
+                    drawCircle(
+                        color = HoshiPurple.copy(alpha = 0.08f),
+                        radius = CategoryHubHaloRadius * renderedScale,
+                        center = systemCenter
+                    )
+                }
+            }
+
             visibleEdges.forEach { edge ->
                 val from = visiblePositions.getValue(edge.from)
                     .toScreen(center, focusedPan, renderedScale)
@@ -160,6 +180,28 @@ private fun KanjiGraphCanvas(
                     start = from,
                     end = to,
                     strokeWidth = if (edge.kind == EdgeKind.KanjiToKanji) 3.4f else 2.2f
+                )
+            }
+        }
+
+        if (selectedRadicalId == null) {
+            graph.radicalCategorySystems().forEach { categorySystem ->
+                val screenPosition = categorySystem.center.toScreen(center, focusedPan, renderedScale)
+                val hubSizePx = with(density) { CategoryHubSize.toPx() }
+                CategoryHubChip(
+                    label = categorySystem.label,
+                    modifier = Modifier
+                        .offset {
+                            IntOffset(
+                                x = (screenPosition.x - hubSizePx / 2f).roundToInt(),
+                                y = (screenPosition.y - hubSizePx / 2f).roundToInt()
+                            )
+                        }
+                        .size(CategoryHubSize)
+                        .graphicsLayer {
+                            scaleX = renderedScale
+                            scaleY = renderedScale
+                        }
                 )
             }
         }
@@ -188,6 +230,43 @@ private fun KanjiGraphCanvas(
                         )
                     }
                     .size(nodeSize)
+                    .graphicsLayer {
+                        scaleX = renderedScale
+                        scaleY = renderedScale
+                    }
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryHubChip(
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier
+            .clip(CircleShape)
+            .border(
+                width = 1.dp,
+                color = HoshiPurple.copy(alpha = 0.72f),
+                shape = CircleShape
+            ),
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 5.dp,
+        shadowElevation = 6.dp
+    ) {
+        Box(
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -267,32 +346,32 @@ private fun rememberKanjiRadicalGraph(): KanjiRadicalGraph = remember {
         GraphNode("k_parent", "親", "parent", NodeKind.Kanji, Offset(470f, 430f), strokeCount = 16)
     )
     val radicals = listOf(
-        GraphNode("r_sun", "日", "sun", NodeKind.Radical, Offset(-80f, -430f)),
-        GraphNode("r_life", "生", "life", NodeKind.Radical, Offset(95f, -425f)),
-        GraphNode("r_cave", "穴", "cave", NodeKind.Radical, Offset(-330f, -340f)),
-        GraphNode("r_work", "工", "work", NodeKind.Radical, Offset(-150f, -340f)),
-        GraphNode("r_legs", "儿", "legs", NodeKind.Radical, Offset(150f, -340f)),
-        GraphNode("r_fire", "火", "fire", NodeKind.Radical, Offset(340f, -335f)),
-        GraphNode("r_tree", "木", "tree", NodeKind.Radical, Offset(-560f, -40f)),
-        GraphNode("r_walk", "辶", "walk", NodeKind.Radical, Offset(560f, -40f)),
-        GraphNode("r_head", "首", "head", NodeKind.Radical, Offset(430f, -345f)),
-        GraphNode("r_speech", "言", "speech", NodeKind.Radical, Offset(-420f, 125f)),
-        GraphNode("r_mouth", "口", "mouth", NodeKind.Radical, Offset(-120f, 210f)),
-        GraphNode("r_child", "子", "child", NodeKind.Radical, Offset(0f, -70f)),
-        GraphNode("r_cover", "冖", "cover", NodeKind.Radical, Offset(130f, -45f)),
-        GraphNode("r_water", "氵", "water", NodeKind.Radical, Offset(420f, 120f)),
-        GraphNode("r_mother", "母", "mother", NodeKind.Radical, Offset(135f, 175f)),
-        GraphNode("r_grass", "艹", "grass", NodeKind.Radical, Offset(-565f, 270f)),
-        GraphNode("r_person", "亻", "person", NodeKind.Radical, Offset(-300f, 335f)),
-        GraphNode("r_moon", "月", "moon", NodeKind.Radical, Offset(260f, 350f)),
-        GraphNode("r_temple", "寺", "temple", NodeKind.Radical, Offset(560f, 250f)),
-        GraphNode("r_field", "田", "field", NodeKind.Radical, Offset(620f, 80f)),
-        GraphNode("r_street", "丁", "block", NodeKind.Radical, Offset(395f, 155f)),
-        GraphNode("r_rain", "雨", "rain", NodeKind.Radical, Offset(620f, -320f)),
-        GraphNode("r_eat", "食", "eat", NodeKind.Radical, Offset(-340f, 520f)),
-        GraphNode("r_lack", "欠", "lack", NodeKind.Radical, Offset(80f, 610f)),
-        GraphNode("r_see", "見", "see", NodeKind.Radical, Offset(335f, 540f)),
-        GraphNode("r_stand", "立", "stand", NodeKind.Radical, Offset(560f, 560f))
+        GraphNode("r_sun", "日", "sun", NodeKind.Radical, Offset(-80f, -430f), category = RadicalCategory.NATURE),
+        GraphNode("r_life", "生", "life", NodeKind.Radical, Offset(95f, -425f), category = RadicalCategory.NATURE),
+        GraphNode("r_cave", "穴", "cave", NodeKind.Radical, Offset(-330f, -340f), category = RadicalCategory.PLACE),
+        GraphNode("r_work", "工", "work", NodeKind.Radical, Offset(-150f, -340f), category = RadicalCategory.PLACE),
+        GraphNode("r_legs", "儿", "legs", NodeKind.Radical, Offset(150f, -340f), category = RadicalCategory.BODY),
+        GraphNode("r_fire", "火", "fire", NodeKind.Radical, Offset(340f, -335f), category = RadicalCategory.NATURE),
+        GraphNode("r_tree", "木", "tree", NodeKind.Radical, Offset(-560f, -40f), category = RadicalCategory.NATURE),
+        GraphNode("r_walk", "辶", "walk", NodeKind.Radical, Offset(560f, -40f), category = RadicalCategory.PLACE),
+        GraphNode("r_head", "首", "head", NodeKind.Radical, Offset(430f, -345f), category = RadicalCategory.BODY),
+        GraphNode("r_speech", "言", "speech", NodeKind.Radical, Offset(-420f, 125f), category = RadicalCategory.CULTURE),
+        GraphNode("r_mouth", "口", "mouth", NodeKind.Radical, Offset(-120f, 210f), category = RadicalCategory.BODY),
+        GraphNode("r_child", "子", "child", NodeKind.Radical, Offset(0f, -70f), category = RadicalCategory.PEOPLE),
+        GraphNode("r_cover", "冖", "cover", NodeKind.Radical, Offset(130f, -45f), category = RadicalCategory.PLACE),
+        GraphNode("r_water", "氵", "water", NodeKind.Radical, Offset(420f, 120f), category = RadicalCategory.NATURE),
+        GraphNode("r_mother", "母", "mother", NodeKind.Radical, Offset(135f, 175f), category = RadicalCategory.PEOPLE),
+        GraphNode("r_grass", "艹", "grass", NodeKind.Radical, Offset(-565f, 270f), category = RadicalCategory.NATURE),
+        GraphNode("r_person", "亻", "person", NodeKind.Radical, Offset(-300f, 335f), category = RadicalCategory.PEOPLE),
+        GraphNode("r_moon", "月", "moon", NodeKind.Radical, Offset(260f, 350f), category = RadicalCategory.NATURE),
+        GraphNode("r_temple", "寺", "temple", NodeKind.Radical, Offset(560f, 250f), category = RadicalCategory.CULTURE),
+        GraphNode("r_field", "田", "field", NodeKind.Radical, Offset(620f, 80f), category = RadicalCategory.PLACE),
+        GraphNode("r_street", "丁", "block", NodeKind.Radical, Offset(395f, 155f), category = RadicalCategory.PLACE),
+        GraphNode("r_rain", "雨", "rain", NodeKind.Radical, Offset(620f, -320f), category = RadicalCategory.NATURE),
+        GraphNode("r_eat", "食", "eat", NodeKind.Radical, Offset(-340f, 520f), category = RadicalCategory.CULTURE),
+        GraphNode("r_lack", "欠", "lack", NodeKind.Radical, Offset(80f, 610f), category = RadicalCategory.BODY),
+        GraphNode("r_see", "見", "see", NodeKind.Radical, Offset(335f, 540f), category = RadicalCategory.BODY),
+        GraphNode("r_stand", "立", "stand", NodeKind.Radical, Offset(560f, 560f), category = RadicalCategory.BODY)
     )
     val radicalEdges = listOf(
         GraphEdge("k_star", "r_sun"),
@@ -544,15 +623,34 @@ private data class KanjiRadicalGraph(
         }
     }
 
+    fun radicalCategorySystems(): List<CategorySystem> {
+        return RadicalCategory.entries.map { category ->
+            CategorySystem(
+                label = category.label,
+                center = category.center,
+                radii = radicals.filter { it.category == category }
+                    .mapIndexed { index, _ -> categoryOrbitFor(index).radius }
+                    .distinct()
+            )
+        }
+    }
+
     private fun overviewPosition(node: GraphNode): Offset {
         val radicalIndex = radicals.indexOfFirst { it.id == node.id }
         if (radicalIndex >= 0) {
-            return gridPosition(
-                index = radicalIndex,
-                count = radicals.size,
-                columns = 5,
-                horizontalGap = 150f,
-                verticalGap = 130f
+            val category = node.category ?: return node.position
+            val categoryRadicals = radicals.filter { it.category == category }
+            val categoryIndex = categoryRadicals.indexOfFirst { it.id == node.id }
+            val orbit = categoryOrbitFor(categoryIndex)
+
+            return category.center + orbitalKanjiPosition(
+                OrbitalNode(
+                    node = node,
+                    radius = orbit.radius,
+                    angleRadians = orbit.startAngleRadians +
+                        categoryIndexInRing(categoryIndex) * orbit.angleStepRadians,
+                    ringIndex = orbit.ringIndex
+                )
             )
         }
 
@@ -696,6 +794,26 @@ private data class KanjiRadicalGraph(
     }
 }
 
+private fun categoryOrbitFor(categoryIndex: Int): CategoryOrbit {
+    val ringIndex = if (categoryIndex < InnerCategoryOrbitCapacity) 0 else 1
+    val capacity = if (ringIndex == 0) InnerCategoryOrbitCapacity else OuterCategoryOrbitCapacity
+    val radius = InnerCategoryOrbitRadius + ringIndex * CategoryOrbitGap
+    return CategoryOrbit(
+        radius = radius,
+        angleStepRadians = (2f * PI.toFloat()) / capacity,
+        startAngleRadians = -PI.toFloat() / 2f + ringIndex * CategoryOrbitAngleOffset,
+        ringIndex = ringIndex
+    )
+}
+
+private fun categoryIndexInRing(categoryIndex: Int): Int {
+    return if (categoryIndex < InnerCategoryOrbitCapacity) {
+        categoryIndex
+    } else {
+        categoryIndex - InnerCategoryOrbitCapacity
+    }
+}
+
 private fun gridPosition(
     index: Int,
     count: Int,
@@ -789,7 +907,8 @@ private data class GraphNode(
     val subtitle: String,
     val kind: NodeKind,
     val position: Offset,
-    val strokeCount: Int = 0
+    val strokeCount: Int = 0,
+    val category: RadicalCategory? = null
 )
 
 private data class GraphEdge(
@@ -822,13 +941,37 @@ private data class ContextNodeAnchor(
     val primaryKanjiId: String
 )
 
+private data class CategorySystem(
+    val label: String,
+    val center: Offset,
+    val radii: List<Float>
+)
+
+private data class CategoryOrbit(
+    val radius: Float,
+    val angleStepRadians: Float,
+    val startAngleRadians: Float,
+    val ringIndex: Int
+)
+
+private enum class RadicalCategory(
+    val label: String,
+    val center: Offset
+) {
+    NATURE("Nature", Offset(-520f, -360f)),
+    BODY("Body", Offset(520f, -360f)),
+    PLACE("Place", Offset(-520f, 300f)),
+    PEOPLE("People", Offset(520f, 300f)),
+    CULTURE("Culture", Offset(0f, 820f))
+}
+
 private fun orbitCapacity(radius: Float): Int {
     val circumference = 2f * PI.toFloat() * radius
     return floor(circumference / MinimumOrbitalNodeSpacing).toInt().coerceAtLeast(MinOrbitCapacity)
 }
 
 private const val InnerOrbitRadius = 170f
-private const val OrbitGap = 132f
+private const val OrbitGap = 172f
 private const val MinOrbitCapacity = 1
 private const val MinimumOrbitalNodeSpacing = 156f
 private const val KanjiNodeLogicalRadius = 48f
@@ -840,6 +983,13 @@ private const val ContextRingIndexOffset = 2
 private const val ContextNodeAlpha = 0.2f
 private const val ContextEdgeAlpha = 0.12f
 private const val LocalContextAngleStepRadians = 0.22f
-private const val OverviewMinimumNodeDistance = 92f
+private const val OverviewMinimumNodeDistance = 132f
 private const val FocusedMinimumNodeDistance = 124f
 private const val CollisionResolutionPasses = 10
+private val CategoryHubSize = 82.dp
+private const val CategoryHubHaloRadius = 54f
+private const val InnerCategoryOrbitRadius = 170f
+private const val CategoryOrbitGap = 164f
+private const val InnerCategoryOrbitCapacity = 5
+private const val OuterCategoryOrbitCapacity = 8
+private const val CategoryOrbitAngleOffset = 0.28f
